@@ -1,179 +1,103 @@
-# WooCommerce Product Catalog Frontend
+# Product Catalog with Filtering and Sorting
 
-A modern, responsive React frontend for displaying WooCommerce products with advanced filtering, searching, and sorting capabilities.
+## Overview
+A full-stack e-commerce product catalog built with React (Vite, TypeScript, TailwindCSS) for the frontend, Node.js/Express for the backend API proxy, and WooCommerce (WordPress) as the product source.
 
 ## Features
-
-- 🛍️ **Product Catalog**: Beautiful grid layout with responsive design
-- 🔍 **Advanced Search**: Real-time search functionality
-- 🏷️ **Category Filtering**: Filter products by categories
-- 💰 **Price Range Filtering**: Set minimum and maximum price limits
-- 📊 **Multiple Sorting Options**: Sort by price, date, popularity, and rating
-- 📱 **Responsive Design**: Optimized for mobile, tablet, and desktop
-- ⚡ **Fast Performance**: Optimized loading with pagination
-- 🎨 **Modern UI**: Clean, professional design with smooth animations
-
-## Tech Stack
-
-- **React 18** with TypeScript
-- **Vite** for fast development and building
-- **TailwindCSS** for styling
-- **React Router** for navigation
-- **Axios** for API calls
-- **Headless UI** for accessible components
-- **Lucide React** for icons
-
-## Quick Start
-
-### Prerequisites
-
-- Node.js 16+ 
-- A running WordPress site with WooCommerce plugin installed
-- WooCommerce REST API enabled
-
-### Installation
-
-1. **Clone and install dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Configure WooCommerce API:**
-   
-   Create a `.env.local` file in the root directory:
-   ```env
-   VITE_WC_API_BASE=https://your-wordpress-site.com/wp-json/wc/v3
-   VITE_WC_CONSUMER_KEY=your-consumer-key
-   VITE_WC_CONSUMER_SECRET=your-consumer-secret
-   ```
-
-3. **Get WooCommerce API credentials:**
-   - Go to your WordPress Admin → WooCommerce → Settings → Advanced → REST API
-   - Click "Add Key"
-   - Set permissions to "Read"
-   - Copy the Consumer Key and Consumer Secret
-
-4. **Start development server:**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser:**
-   Navigate to `http://localhost:5173`
+- Product listing with filtering (search, category, price range)
+- Sorting (price, rating, newest, best selling)
+- Product detail page with images, price, stock status, and attributes
+- Add to Cart/Out of Stock button
+- Backend proxy for WooCommerce API (handles OAuth 1.0a)
+- Responsive, modern UI
 
 ## Project Structure
-
 ```
-src/
-├── components/          # Reusable UI components
-│   ├── Navbar.tsx      # Navigation with search
-│   ├── ProductCard.tsx # Individual product display
-│   ├── ProductGrid.tsx # Product grid with pagination
-│   ├── FilterSidebar.tsx # Category and price filters
-│   ├── SortDropdown.tsx # Sorting options
-│   └── LoadingSpinner.tsx # Loading states
-├── pages/              # Main page components
-│   ├── Home.tsx        # Product catalog page
-│   └── ProductDetail.tsx # Individual product page
-├── services/           # API integration
-│   └── api.ts          # WooCommerce API calls
-├── hooks/              # Custom React hooks
-│   └── useProducts.ts  # Product data management
-├── context/            # Global state management
-│   └── FilterContext.tsx # Filter state
-├── types/              # TypeScript definitions
-│   └── index.ts        # Product and API types
-└── utils/              # Helper functions
+productCatalog/
+├── components/         # Reusable React components
+├── lib/                # Utility functions
+├── src/                # Main React app source
+│   ├── components/     # UI components
+│   ├── context/        # React Context for filters
+│   ├── hooks/          # Custom hooks (API fetching)
+│   ├── pages/          # Page components (Home, ProductDetail)
+│   ├── services/       # API service layer
+│   ├── types/          # TypeScript types
+│   ├── index.css       # Global styles
+│   ├── App.tsx         # Main app component
+│   ├── main.tsx        # Entry point
+├── backend/            # Node.js/Express backend proxy
+├── package.json        # Project dependencies
+├── vite.config.ts      # Vite configuration
+├── tailwind.config.js  # TailwindCSS config
+├── README.md           # Project documentation
 ```
 
-## Available Scripts
+## Setup & Development
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+### 1. Prerequisites
+- Node.js (v18+ recommended)
+- npm or yarn
+- WordPress with WooCommerce (local or public)
 
-## API Integration
+### 2. Install Dependencies
+```bash
+npm install
+```
 
-The app connects to WooCommerce REST API endpoints:
+### 3. Environment Variables
+Create a `.env` file in the `backend/` directory for WooCommerce API keys:
+```
+WOOCOMMERCE_CONSUMER_KEY=your_key
+WOOCOMMERCE_CONSUMER_SECRET=your_secret
+WOOCOMMERCE_URL=https://your-wordpress-site.com
+```
 
-- `GET /wp-json/wc/v3/products` - Fetch products with filtering
-- `GET /wp-json/wc/v3/products/:id` - Get single product
-- `GET /wp-json/wc/v3/products/categories` - Get categories
+### 4. Run Locally
+- **Frontend:**
+  ```bash
+  npm run dev
+  ```
+- **Backend:**
+  ```bash
+  cd backend
+  node index.js
+  ```
 
-### Supported Parameters
+### 5. Connect Frontend to Backend
+Set the frontend API base URL to your backend (e.g., `http://localhost:3001/api`).
 
-- `search` - Text search in product names
-- `category` - Filter by category IDs
-- `orderby` - Sort by: date, price, popularity, rating
-- `order` - Sort direction: asc, desc
-- `min_price` / `max_price` - Price range filtering
-- `per_page` - Products per page (pagination)
+## Deployment (Vercel)
+
+### Frontend
+1. Push your code to GitHub/GitLab/Bitbucket.
+2. Import the repo in Vercel.
+3. Vercel auto-detects React/Vite and deploys.
+4. Set environment variables for API URLs in Vercel dashboard.
+
+### Backend
+- Move backend code to `/api` for Vercel serverless functions, or deploy as a separate Vercel project.
+- Set WooCommerce API keys in Vercel environment variables.
+- Ensure your WordPress site is publicly accessible (not localhost) for production. Use [ngrok](https://ngrok.com/) for testing if needed.
+
+## API Endpoints
+- `GET /api/products` — Fetch all products
+- `GET /api/categories` — Fetch product categories
+- `GET /api/products/:id` — Fetch product details
+- `GET /api/search?q=term` — Search products
 
 ## Customization
+- Edit styles in `index.css` and `tailwind.config.js`
+- Add new components in `src/components/`
+- Extend backend logic in `backend/index.js`
 
-### Styling
-The app uses TailwindCSS for styling. Customize colors, spacing, and components by editing the Tailwind classes.
-
-### API Configuration
-Modify `src/services/api.ts` to add custom endpoints or change request handling.
-
-### Components
-All components are modular and can be easily customized or extended.
-
-## Deployment
-
-### Build for Production
-```bash
-npm run build
-```
-
-### Deploy to Vercel
-1. Connect your GitHub repository to Vercel
-2. Add environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
-
-### Deploy to Netlify
-1. Build the project: `npm run build`
-2. Upload the `dist` folder to Netlify
-3. Configure environment variables in Netlify dashboard
-
-## Environment Variables
-
-Required environment variables:
-
-```env
-VITE_WC_API_BASE=https://yoursite.com/wp-json/wc/v3
-VITE_WC_CONSUMER_KEY=ck_your_consumer_key
-VITE_WC_CONSUMER_SECRET=cs_your_consumer_secret
-```
-
-## Browser Support
-
-- Chrome (last 2 versions)
-- Firefox (last 2 versions)
-- Safari (last 2 versions)
-- Edge (last 2 versions)
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+## Troubleshooting
+- If products/categories do not load, check backend API and WooCommerce credentials.
+- For CORS issues, ensure frontend calls the backend proxy, not WooCommerce directly.
+- For deployment, WordPress must be public (not localhost) for Vercel backend to access.
 
 ## License
+MIT
 
-MIT License - feel free to use this project for personal or commercial purposes.
-
-## Support
-
-For issues and questions:
-1. Check the README and documentation
-2. Search existing GitHub issues
-3. Create a new issue with detailed information
-
----
-
-Built with ❤️ using React and TailwindCSS
+## Author
+Ibtesam Hussain

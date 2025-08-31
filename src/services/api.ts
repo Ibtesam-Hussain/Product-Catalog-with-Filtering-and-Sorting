@@ -4,7 +4,7 @@ import { Product } from '../types';
 // Configure your WooCommerce API credentials here
 // Use local products.json for mock API
 const api = axios.create({
-  baseURL: 'http://localhost:4000', // Backend proxy URL
+  baseURL: 'https://product-catalog-with-filtering-and.vercel.app/', // Backend proxy URL
 });
 
 export interface ProductsParams {
