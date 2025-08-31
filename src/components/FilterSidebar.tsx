@@ -80,7 +80,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ isOpen = true, onClose })
         {expandedSections.categories && (
           <div className="space-y-2 pl-2">
             {categories.map((category) => (
-              <label key={category.id} className="flex items-center space-x-2">
+              <label key={category.id ?? category.name} className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={filters.categories.includes(category.id)}

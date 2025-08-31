@@ -56,7 +56,7 @@ const DropdownMenu = ({ options, selected, onSelect }: DropdownMenuProps) => {
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <div onClick={handleTriggerClick} className="cursor-pointer">
-        <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+  <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-md shadow-sm hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
           {selected}
           <ChevronDown className="ml-2 h-4 w-4" />
         </button>

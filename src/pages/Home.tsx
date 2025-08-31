@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Filter, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Filter } from 'lucide-react';
 import { useProducts } from '../hooks/useProducts';
 import { useFilters } from '../context/FilterContext';
 import ProductGrid from '../components/ProductGrid';
@@ -7,23 +7,78 @@ import FilterSidebar from '../components/FilterSidebar';
 import SortDropdown from '../components/SortDropdown';
 
 const Home: React.FC = () => {
-  const { products, loading, hasMore, fetchProducts, loadMore } = useProducts();
+  const { products, loading } = useProducts();
   const { filters } = useFilters();
+
+  // Search, category, price range filtering, and sorting logic
+  let filteredProducts = products.filter(product => {
+    const name = product.name || product.Name || '';
+    const searchTerm = filters.search?.toLowerCase() || '';
+    const matchesSearch = !searchTerm || name.toLowerCase().includes(searchTerm);
+
+    // Category filter: product.Categories is a string like "Clothing > Men > Tops"
+    let productCategorySegments: string[] = [];
+    if (product.Categories && typeof product.Categories === 'string') {
+      productCategorySegments = product.Categories.split('>').map((cat: string) => cat.trim());
+    }
+    // If no categories selected, match all
+    const selectedCategories = filters.categories || [];
+    const matchesCategory =
+      selectedCategories.length === 0 ||
+      selectedCategories.some(selectedCat =>
+        typeof selectedCat === 'string' &&
+        productCategorySegments.some(segment => segment.toLowerCase() === selectedCat.toLowerCase())
+      );
+
+    // Price filter: check product price against filters.priceRange
+    // Try Sale price, Regular price, or price
+    let priceStr = product.price || product.sale_price || product.regular_price || product["Sale price"] || product["Regular price"] || '';
+    let priceNum = parseFloat(priceStr) || 0;
+    const matchesPrice = priceNum >= filters.priceRange.min && priceNum <= filters.priceRange.max;
+
+    return matchesSearch && matchesCategory && matchesPrice;
+  });
+
+  // Sorting logic
+  const { sortBy, sortOrder } = filters;
+  filteredProducts = filteredProducts.sort((a, b) => {
+    let compare = 0;
+    // Price
+    if (sortBy === 'price') {
+      const aPrice = parseFloat(a.price || a.sale_price || a.regular_price || a["Sale price"] || a["Regular price"] || '0') || 0;
+      const bPrice = parseFloat(b.price || b.sale_price || b.regular_price || b["Sale price"] || b["Regular price"] || '0') || 0;
+      compare = aPrice - bPrice;
+    }
+    // Date
+    else if (sortBy === 'date') {
+      const aDate = new Date(a.date_created || a["Date Created"] || '').getTime();
+      const bDate = new Date(b.date_created || b["Date Created"] || '').getTime();
+      compare = aDate - bDate;
+    }
+    // Rating
+    else if (sortBy === 'rating') {
+      const aRating = parseFloat(a.average_rating || a["Average Rating"] || '0') || 0;
+      const bRating = parseFloat(b.average_rating || b["Average Rating"] || '0') || 0;
+      compare = aRating - bRating;
+    }
+    // Popularity
+    else if (sortBy === 'popularity') {
+      const aSales = parseInt(a.total_sales || a["Total Sales"] || '0', 10) || 0;
+      const bSales = parseInt(b.total_sales || b["Total Sales"] || '0', 10) || 0;
+      compare = aSales - bSales;
+    }
+    // Default: no sorting
+    else {
+      compare = 0;
+    }
+    return sortOrder === 'asc' ? compare : -compare;
+  });
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Fetch products when filters change
-  useEffect(() => {
-    const params = {
-      search: filters.search || undefined,
-      category: filters.categories.length > 0 ? filters.categories.join(',') : undefined,
-      orderby: filters.sortBy,
-      order: filters.sortOrder,
-      min_price: filters.priceRange.min > 0 ? filters.priceRange.min : undefined,
-      max_price: filters.priceRange.max < 1000 ? filters.priceRange.max : undefined,
-    };
+  // No need to fetch products on filter change, all products are loaded at once
 
-    fetchProducts(params, true);
-  }, [filters, fetchProducts]);
+  // Infinite scroll effect
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -51,7 +106,7 @@ const Home: React.FC = () => {
 
             {/* Results Count */}
             <span className="text-sm text-gray-600">
-              {loading ? 'Loading...' : `${products.length} products`}
+              {loading ? 'Loading...' : `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} found`}
             </span>
           </div>
 
@@ -74,10 +129,8 @@ const Home: React.FC = () => {
           <div className="flex-1">
             {/* Products Grid */}
             <ProductGrid
-              products={products}
+              products={filteredProducts}
               loading={loading}
-              hasMore={hasMore}
-              onLoadMore={loadMore}
             />
           </div>
         </div>

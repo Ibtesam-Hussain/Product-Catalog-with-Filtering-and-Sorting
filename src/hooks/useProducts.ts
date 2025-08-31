@@ -6,51 +6,28 @@ export const useProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchProducts = useCallback(async (params: ProductsParams = {}, reset: boolean = false) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const newProducts = await productApi.getProducts({
-        page: reset ? 1 : currentPage,
-        per_page: 12,
-        ...params
-      });
-
-      if (reset) {
-        setProducts(newProducts);
-        setCurrentPage(1);
-      } else {
-        setProducts(prev => [...prev, ...newProducts]);
+  useEffect(() => {
+    const fetchAllProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const allProducts = await productApi.getProducts();
+        setProducts(allProducts);
+      } catch (err) {
+        setError('Failed to fetch products');
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-
-      setHasMore(newProducts.length === 12);
-      
-    } catch (err) {
-      setError('Failed to fetch products');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage]);
-
-  const loadMore = () => {
-    if (!loading && hasMore) {
-      setCurrentPage(prev => prev + 1);
-    }
-  };
+    };
+    fetchAllProducts();
+  }, []);
 
   return {
     products,
     loading,
-    error,
-    hasMore,
-    fetchProducts,
-    loadMore,
-    currentPage
+    error
   };
 };
 
@@ -63,7 +40,12 @@ export const useCategories = () => {
     const fetchCategories = async () => {
       try {
         const data = await productApi.getCategories();
-        setCategories(data);
+        // Ensure each category has id and slug for correct typing
+        setCategories(data.map((cat: any, idx: number) => ({
+          id: cat.id ?? idx,
+          name: cat.name,
+          slug: cat.slug ?? (typeof cat.name === 'string' ? cat.name.toLowerCase().replace(/\s+/g, '-') : String(idx))
+        })));
       } catch (err) {
         setError('Failed to fetch categories');
         console.error(err);
